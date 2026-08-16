@@ -9,8 +9,8 @@ saves:
   - a metrics comparison table (model/metrics.csv)
   - a held-out test_data.csv (used later by the Streamlit app)
 
-Run once locally / on BITS Virtual Lab:
-    python model/train_models.py
+Usage:
+    python train_models.py
 """
 
 import pandas as pd
@@ -50,11 +50,10 @@ df = pd.read_csv(DATA_PATH)
 # TotalCharges has some blank strings for brand-new customers -> coerce to numeric
 df["TotalCharges"] = pd.to_numeric(df["TotalCharges"], errors="coerce")
 
-# Drop the ID column (not a feature)
+# Dropping the ID column (not a feature)
 df = df.drop(columns=["customerID"])
 
-# A couple of light, defensible engineered features (keeps this from being a
-# pure copy of the raw dataset and gives the models a bit more signal)
+
 df["AvgMonthlySpend"] = df["TotalCharges"] / df["tenure"].replace(0, 1)
 df["IsNewCustomer"] = (df["tenure"] <= 6).astype(int)
 
@@ -73,14 +72,12 @@ print(f"Categorical features ({len(categorical_features)}): {categorical_feature
 print(f"Total features: {len(numeric_features) + len(categorical_features)} | Rows: {len(X)}")
 
 # ---------------------------------------------------------------------
-# 2. Train / test split (test split is what we export as test_data.csv)
+# 2. Train / test split
 # ---------------------------------------------------------------------
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=RANDOM_STATE, stratify=y
 )
 
-# Save the raw (unprocessed) test split as test_data.csv for the assignment
-# submission + for uploading into the Streamlit app.
 test_export = X_test.copy()
 test_export[target_col] = le.inverse_transform(y_test)
 test_export.to_csv(OUT_DIR / "test_data.csv", index=False)

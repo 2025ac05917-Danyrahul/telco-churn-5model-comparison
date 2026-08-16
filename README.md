@@ -13,8 +13,7 @@ evaluation on held-out test data.
 - **Instances:** 7,043 customers
 - **Features:** 21 raw columns (after dropping the ID column and adding 2
   lightweight engineered features — `AvgMonthlySpend`, `IsNewCustomer` — the
-  model sees 21 usable features: 6 numeric, 15 categorical), which satisfies
-  the assignment's minimum of 12 features and 500 instances.
+  model sees 21 usable features: 6 numeric, 15 categorical).
 - **Target:** `Churn` — binary (`Yes` / `No`)
 - **Feature groups:**
   - Demographics: gender, SeniorCitizen, Partner, Dependents
@@ -32,7 +31,7 @@ evaluation on held-out test data.
   the Streamlit app is designed to evaluate.
 
 ## c. GitHub Repository Link
-`<PASTE YOUR GITHUB REPO URL HERE AFTER YOU PUSH>`
+
 
 ## d. Models Used
 
@@ -83,7 +82,7 @@ streamlit run app.py
 Then in the sidebar, upload `test_data.csv` and pick a model from the dropdown.
 
 ## Deployment
-Deployed on Streamlit Community Cloud: `<PASTE YOUR LIVE APP LINK HERE>`
+Deployed on Streamlit Community Cloud: 
 
 ## BITS Virtual Lab Execution
-Screenshot of the app running on BITS Virtual Lab: `<INSERT SCREENSHOT / LINK HERE>`
+Screenshot of the app running on BITS Virtual Lab: 

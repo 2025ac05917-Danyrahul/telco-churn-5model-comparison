@@ -1,6 +1,6 @@
 """
-Streamlit app for ML Assignment 2 — Customer Churn Classification Demo
-Run locally:   streamlit run app.py
+Streamlit app for Telco customer churn classification with 5 models
+Usage:   streamlit run app.py
 """
 
 import streamlit as st
@@ -80,7 +80,7 @@ if has_labels:
 else:
     X_input = df.copy()
 
-# Recreate the same light feature engineering used at training time
+
 if "TotalCharges" in X_input.columns:
     X_input["TotalCharges"] = pd.to_numeric(X_input["TotalCharges"], errors="coerce")
 if "tenure" in X_input.columns and "TotalCharges" in X_input.columns:
