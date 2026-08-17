@@ -1,41 +1,46 @@
 # Customer Churn Prediction — Multi-Model Classification
 
 ## a. Problem Statement
-Telecom companies lose significant revenue to customer churn. This project builds
-and compares multiple classification models to predict whether a customer will
-churn (leave the service) based on their account, billing, and service usage
-attributes, and exposes the models through an interactive Streamlit web app for
-evaluation on held-out test data.
+Telecom companies lose a lot of customers every year, and this is called "churn."
+In this project, I built machine learning models to predict whether a customer
+will leave the telecom company (churn) or stay, based on their account details,
+billing information, and the services they use. I also built a simple web app
+using Streamlit so anyone can upload test data and see how the models perform.
 
 ## b. Dataset Description
-- **Source:** Telco Customer Churn dataset (public, originally released by IBM
-  Sample Data Sets; commonly hosted on Kaggle as "Telco Customer Churn").
-- **Instances:** 7,043 customers
-- **Features:** 21 raw columns (after dropping the ID column and adding 2
-  lightweight engineered features — `AvgMonthlySpend`, `IsNewCustomer` — the
-  model sees 21 usable features: 6 numeric, 15 categorical).
-- **Target:** `Churn` — binary (`Yes` / `No`)
-- **Feature groups:**
-  - Demographics: gender, SeniorCitizen, Partner, Dependents
-  - Account info: tenure, Contract, PaperlessBilling, PaymentMethod,
+- **Source:** Telco Customer Churn dataset. This is a public dataset originally
+  shared by IBM and is also commonly found on Kaggle under the name "Telco
+  Customer Churn."
+- **Number of rows:** 7,043 customers
+- **Number of features:** 21 columns are used to train the models (after
+  removing the customer ID column, which is not useful for prediction, and
+  adding 2 new columns I created: `AvgMonthlySpend` and `IsNewCustomer`). Out
+  of these, 6 are numeric and 15 are categorical.
+- **Target column:** `Churn` — this tells us if the customer left (`Yes`) or
+  stayed (`No`).
+- **Main groups of features:**
+  - Customer details: gender, SeniorCitizen, Partner, Dependents
+  - Account details: tenure, Contract, PaperlessBilling, PaymentMethod,
     MonthlyCharges, TotalCharges
-  - Services subscribed: PhoneService, MultipleLines, InternetService,
+  - Services used: PhoneService, MultipleLines, InternetService,
     OnlineSecurity, OnlineBackup, DeviceProtection, TechSupport, StreamingTV,
     StreamingMovies
-- **Preprocessing:** missing `TotalCharges` values (new customers with 0
-  tenure) imputed with the median; numeric features standardized; categorical
-  features one-hot encoded via a `ColumnTransformer` fit only on the training
-  split to avoid leakage.
-- **Split:** 80% train / 20% test (stratified on the target), random_state=42.
-  The 20% test split (1,409 rows) is exported as `test_data.csv` and is what
-  the Streamlit app is designed to evaluate.
+- **Data cleaning done:**
+  - Some `TotalCharges` values were missing for new customers, so I filled
+    them in using the median value.
+  - Numeric columns were scaled so all values are on a similar range.
+  - Categorical columns were converted into numbers using one-hot encoding.
+- **Train/Test split:** I split the data into 80% for training and 20% for
+  testing, using `random_state=42` so the split stays the same every time.
+  This test part (1,409 rows) was saved as `test_data.csv` and is the file
+  used inside the Streamlit app.
 
 ## c. GitHub Repository Link
-
+https://github.com/danyrahul/telco-churn-5model-comparison
 
 ## d. Models Used
 
-### Comparison Table (on the held-out test set, 1,409 rows)
+### Comparison Table (results on the 1,409-row test set)
 
 | ML Model Name        | Accuracy | AUC    | Precision | Recall | F1     | MCC    |
 |-----------------------|----------|--------|-----------|--------|--------|--------|
@@ -45,44 +50,13 @@ evaluation on held-out test data.
 | Naive Bayes           | 0.6955   | 0.8135 | 0.4593    | 0.8289 | 0.5910 | 0.4209 |
 | Random Forest (Ensemble) | 0.7963 | 0.8349 | 0.6408    | 0.5294 | 0.5798 | 0.4505 |
 
-*(Regenerated automatically by `model/train_models.py` — see `model/metrics.csv`
-for the source of truth if you re-run training.)*
-
 ### Observations
 
 | ML Model Name | Observation about model performance |
 |---|---|
-| Logistic Regression | Best overall balance of accuracy, AUC, and MCC. The churn signal in this dataset (contract type, tenure, monthly charges) is largely linear/monotonic, which suits a linear decision boundary well, and it doesn't overfit on the moderate feature count after one-hot encoding. |
-| Decision Tree | Weakest performer here — a single tree at this depth overfits patterns in the majority class and misses more of the minority "churn" cases (lowest recall and MCC), even with depth limited to control overfitting. |
-| kNN | Competitive AUC and recall since churners tend to cluster in feature space (short tenure, month-to-month contracts), but performance is sensitive to feature scaling and the choice of k; accuracy trails the linear model slightly. |
-| Naive Bayes | Highest recall by a wide margin — it's willing to flag many customers as "at risk," which is useful if the business cost of missing a churner is high, but this comes at the cost of the lowest precision and accuracy because of many false positives. Its independence assumption is also clearly violated by correlated features like tenure/TotalCharges. |
-| Random Forest (Ensemble) | Second-best overall — averaging many trees reduces the variance/overfitting problem seen in the single Decision Tree and lifts AUC and MCC close to Logistic Regression, though it still slightly under-predicts the minority churn class relative to Logistic Regression's recall/precision balance. |
-| **Overall Winner for this dataset** | **Logistic Regression** — highest Accuracy, AUC, and MCC, with a solid Precision/Recall balance. Given the near-linear separability of churn drivers (tenure, contract type, charges) in this dataset, a simple linear model outperforms the more complex ones, which is a useful reminder that model complexity should match the underlying data structure. |
-
-## Repository Structure
-```
-project-folder/
-│-- app.py                     # Streamlit app
-│-- requirements.txt
-│-- README.md
-│-- test_data.csv              # held-out test split used for evaluation
-│-- telco.csv                  # full raw dataset (for reference/reproducibility)
-│-- model/
-│   │-- train_models.py        # trains all 5 models, saves artifacts + metrics
-│   │-- metrics.csv            # generated comparison table
-│   │-- *.joblib                # trained models + fitted preprocessor
-```
-
-## How to Run Locally
-```bash
-pip install -r requirements.txt
-python model/train_models.py     # regenerates models/metrics (already included)
-streamlit run app.py
-```
-Then in the sidebar, upload `test_data.csv` and pick a model from the dropdown.
-
-## Deployment
-Deployed on Streamlit Community Cloud: 
-
-## BITS Virtual Lab Execution
-Screenshot of the app running on BITS Virtual Lab: 
+| Logistic Regression | This model gave the best overall results — highest accuracy, AUC, and MCC. Since churn in this data mostly depends on things like contract type and tenure in a fairly straightforward way, a simple linear model was able to capture the pattern well without overfitting. |
+| Decision Tree | This was the weakest model. A single tree tends to overfit and struggled the most to correctly find customers who actually churned (lowest recall and MCC), even though I limited how deep the tree could grow. |
+| kNN | Performed decently, with a good AUC and recall — this makes sense because customers who churn often have similar patterns (like short tenure or month-to-month contracts) and end up close to each other. But its accuracy was a bit lower than Logistic Regression. |
+| Naive Bayes | This model found the most actual churners (highest recall), which is useful if missing a churner is costly for the business. But it also gave many false alarms, so its precision and overall accuracy were the lowest. Naive Bayes assumes features are independent, which is not really true here (e.g., tenure and TotalCharges are related), and that hurts its performance. |
+| Random Forest (Ensemble) | This was the second-best model. By combining many decision trees, it fixed most of the overfitting problem seen in the single Decision Tree and got results close to Logistic Regression. |
+| **Overall Winner for this dataset** | **Logistic Regression** — it had the best accuracy, AUC, and MCC, with a good balance of precision and recall. This shows that for this dataset, the churn patterns are simple enough that a basic linear model works better than more complex ones. |
